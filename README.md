@@ -1,0 +1,1 @@
+Unity Asset Extractor library written in .NET Core
