@@ -32,7 +32,7 @@ namespace Gext
 
 		/**
 		 * Constructs a new Asset bundle based on the file specified by path
-		 * 
+		 *
 		 * @throws exception if cannot read file
 		 */
 		public AssetBundle(String filePath)
@@ -60,8 +60,8 @@ namespace Gext
 		private void LoadUnityFs(UnityDataReader reader)
 		{
 			var fsFileSize = reader.ReadInt64();
-			var ciblockSize = reader.ReadUInt32();
-			var uiblockSize = reader.ReadUInt32();
+			var ciblockSize = (int) reader.ReadUInt32();
+			var uiblockSize = (int) reader.ReadUInt32();
 
 			var flags = reader.ReadUInt32();
 
@@ -71,27 +71,17 @@ namespace Gext
 			Console.WriteLine(data.Length);
 		}
 
-		private byte[] ReadCompressedData(UnityDataReader reader, UInt32 ciblockSize, UInt32 uiblockSize, CompressionType compression)
+		private byte[] ReadCompressedData(UnityDataReader reader, int ciblockSize, int uiblockSize, CompressionType compression)
 		{
 			if (compression == CompressionType.None)
 			{
-				return reader.ReadBytes((int)ciblockSize);;
+				return reader.ReadBytes(ciblockSize);
 			}
 
 			if (compression == CompressionType.Lz4 || compression == CompressionType.Lz4hc)
 			{
-				byte[] sizeBytes = BitConverter.GetBytes(uiblockSize);
-				var compressedData = new byte[sizeBytes.Length + ciblockSize];
-				sizeBytes.CopyTo(compressedData, 0);
-				reader.ReadBytes((int)ciblockSize).CopyTo(compressedData, sizeBytes.Length);
-
-				var decompressor = new LZ4Stream(new MemoryStream(compressedData), LZ4StreamMode.Decompress);
-
-				using (var ms = new MemoryStream())
-			    {
-			        decompressor.CopyTo(ms);
-			        return ms.ToArray();
-			    }
+				var compressedData = reader.ReadBytes(ciblockSize);
+				return LZ4Codec.Decode(compressedData, 0, ciblockSize, uiblockSize);
 			}
 
 			return new byte[0];
