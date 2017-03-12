@@ -122,8 +122,8 @@ namespace Gext
 			for (int i = 0; i < numNodes; i++)
 			{
 				var offset = blk.ReadInt64();
-				var size = blk.ReadInt32();
-				var status = blk.ReadInt16();
+				var size = blk.ReadInt64();
+				var status = blk.ReadInt32();
 				var name = blk.ReadString();
 
 				nodes[i] = new AssetDataInfo(offset, size, status, name);
@@ -366,11 +366,11 @@ namespace Gext
 	internal struct AssetDataInfo
 	{
 		internal long Offset;
-		internal int Size;
+		internal long Size;
 		internal int Status;
 		internal string Name;
 
-		public AssetDataInfo(long offset, int size, int status, string name)
+		public AssetDataInfo(long offset, long size, int status, string name)
 		{
 			Offset = offset;
 			Size = size;
